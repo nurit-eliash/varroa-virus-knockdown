@@ -1,9 +1,9 @@
 ---
 title: "Varroa virus knockdows"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
 editor_options: 
   chunk_output_type: console
 ---
@@ -23,6 +23,12 @@ results <- data.frame()
 for (gene in unique(dat$Experiment))
   for (virus in unique(dat$Gene)) {
     test <- wilcox.test(RQ ~ Treatment, alternative = "greater", data = filter(dat, Experiment == gene & Gene == virus) )
-    results <- rbind(results, data.frame(test = paste(gene, virus), pvalue = test$p.value))
+    results <- rbind(results, data.frame(gene = gene, virus = virus, pvalue = test$p.value))
   }
+```
+
+We are testing the same knockdown gene several times, creating a multiple comparison problem, we fix that with a FDR correction per gene.
+
+```{r}
+group_by(results, gene) %>% mutate(padj = p.adjust(pvalue, method = "fdr"))
 ```
