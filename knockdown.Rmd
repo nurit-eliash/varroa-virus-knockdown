@@ -1,44 +1,43 @@
 ---
-title: "R Notebook"
-output: html_notebook
-editor_options: 
-  chunk_output_type: console
+title: "Varroa virus knockdows"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
-```{r startup}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries}
 suppressPackageStartupMessages(library(tidyverse))
 library(brms)
+library(glue)
+
 dat <- read_csv("data/virus_in_silenced.csv")
 ```
 
-## CuP14 knockdown
 
-### VDV2
-```{r CuP14_VDV2}
-CuP14_VDV2 <- filter(dat, Experiment == "CuP14_exp" & Gene == "VDV2")
-ggplot(CuP14_VDV2, aes(Treatment, RQ)) + geom_point()
-CuP14_VDV2_brms <-brm(bf(RQ ~ Treatment, sigma ~ Treatment), family=student, data = CuP14_VDV2)
-plot(CuP14_VDV2_brms)
-summary(CuP14_VDV2_brms)
-hypothesis(CuP14_VDV2_brms, "TreatmentSilenced < 0") # directional hypothesis test that silenced is lower
+```{r cache=TRUE}
+brmModel <- brm(bf(RQ ~ Treatment:Experiment:Gene+0, sigma ~ Treatment + Experiment + Gene), family = student, data = filter(dat, RQ<30), cores = 4, iter = 10000)
 ```
 
-### ARV2
-```{r CuP14_ARV2}
-CuP14_ARV2 <- filter(dat, Experiment == "CuP14_exp" & Gene == "ARV2")
-ggplot(CuP14_ARV2, aes(Treatment, RQ)) + geom_point()
-CuP14_ARV2_brms <-brm(bf(RQ ~ Treatment, sigma ~ Treatment), family=student, data = CuP14_ARV2)
-plot(CuP14_ARV2_brms)
-summary(CuP14_ARV2_brms)
-hypothesis(CuP14_ARV2_brms, "TreatmentSilenced < 0")
-```
+```{r}
+summary(brmModel)
 
-### DWVa
-```{r CuP14_DWVa}
-CuP14_DWVa <- filter(dat, Experiment == "CuP14_exp" & Gene == "DWVa")
-ggplot(CuP14_DWVa, aes(Treatment, RQ)) + geom_point()
-CuP14_DWVa_brms <-brm(bf(RQ ~ Treatment, sigma ~ Treatment), family=student, data = CuP14_DWVa)
-plot(CuP14_DWVa_brms)
-summary(CuP14_DWVa_brms)
-hypothesis(CuP14_DWVa_brms, "TreatmentSilenced < 0")
+hypotheses <- data.frame()
+for (gene in unique(dat$Experiment))
+  for (virus in unique(dat$Gene)) {
+    hyp <- hypothesis(brmModel, glue("TreatmentSilenced:Experiment{gene}:Gene{virus} < TreatmentControl:Experiment{gene}:Gene{virus}"))
+    hyp$hypothesis$test <- paste(gene, virus)
+    hypotheses <- rbind(hypotheses, hyp$hypothesis)
+  }
+    
+hypotheses[,c("test", "Estimate", "Post.Prob", "Star")]
+
+filter(dat, Experiment == "CuP8_exp" & Gene == "VDV2" & RQ<30) %>% ggplot(aes(Treatment, RQ)) + geom_boxplot()
+
+filter(dat, Experiment == "CuP8_exp" & Gene == "ARV2" & RQ<30) %>% ggplot(aes(Treatment, RQ)) + geom_boxplot()
+
 ```
