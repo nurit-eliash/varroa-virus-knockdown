@@ -39,8 +39,6 @@ library(intervcomp)
 library(grid)
 library(formattable)
 library(gridExtra)
-
-
 ```
 
 ### Load data
@@ -65,6 +63,7 @@ for (gene in unique(dat_gene$Gene))
 #We are testing the same knockdown gene several times, creating a multiple comparison problem, we fix that with a FDR correction per gene
 geneExp <- group_by(results_gene, gene) %>% 
   mutate(padj = p.adjust(pvalue, method = "fdr"))
+geneExp <- dplyr::rename(geneExp, Gene = gene) #i changed the colname of "gene" to "Gene". for some reason this was disturbing in "filter" function later on. 
 
 # plot all genes expression for silenced and control-mites, in a boxplot
 boxplot <- list()
@@ -72,14 +71,15 @@ for (gene in unique(dat_gene$Gene))
 {
   table <- filter(dat_gene, Gene == gene)
   N <- nrow(table)
-  Padjust <- formattable(as.double(geneExp$padj[1]), digits = 2, format = "f")
-# Plot
+geneExppadj <- filter(geneExp, Gene == gene)
+  Padjust <- formattable(as.double(geneExppadj[1,3], digits = 2, format = "f"))
+  # Plot
    p <- ggboxplot(table, x = "Treatment", y = "RQ", 
-          main = paste(gene, ", Padjust=",Padjust ,", n=", N),
+          main = paste(gene,",Padjust=",Padjust,", n=",N),
           color = "Treatment", palette = c("#00AFBB", "#E7B800"),
           order = c("Control", "Silenced"),
           ylab = "Relative expression", xlab = "Treatment")  + 
-          theme(legend.position = "none", text = element_text(size=13)) 
+          theme(legend.position = "none", text = element_text(size=8)) 
   boxplot[[gene]] <- p
 }
 
@@ -112,7 +112,7 @@ table <- filter(dat_gene, Gene == "CuP8")
   stats <- grobTree(textGrob("N = 22\nPadjust < 0.0001", x=0.5,  y=0.9, hjust=0,
   gp=gpar(col="black", fontsize=20)))
 # Plot
-  p <- ggboxplot(table, x = "Treatment", y = "RQ", 
+  CuP8 <- ggboxplot(table, x = "Treatment", y = "RQ", 
           main = "CuP8 expression",
           color = "Treatment", palette = c("#00AFBB", "#E7B800"),
           order = c("Control", "Silenced"),
@@ -141,27 +141,30 @@ VDV2 viral loads for silenced and control-mites
 # plot VDV2 viral loads for silenced and control-mites, in a boxplot
 VDV2Load <- viralLoad %>% filter(virus == "VDV2") #%>% gsub('exp', 'VDV2')
 VDV2Load$gene = gsub('exp', 'VDV2', VDV2Load$gene)
-
+VDV2Load <- dplyr::rename(VDV2Load, Gene = gene) #i changed the colname of "gene" to "Gene". for some reason this was disturbing in "filter" function later on. 
+    
 datVDV2 <- filter(dat_virus, Gene == "VDV2")
 datVDV2$Experiment = gsub('exp', 'VDV2', datVDV2$Experiment)
-
 
 boxplotVDV2 <- list()
 for (gene in unique(datVDV2$Experiment)) 
 {
   table <- filter(datVDV2, Experiment == gene)
   N <- nrow(table)
-  Padjust <- formattable(as.double(VDV2Load$padj[1]), digits = 2, format = "f")
+  VDV2padj <- filter(VDV2Load, Gene == gene)
+  Padjust <- formattable(as.double(VDV2padj[1,4], digits = 2, format = "f"))
+    
 # Plot
    p <- ggboxplot(table, x = "Treatment", y = "RQ", 
-          main = paste(gene, ", Padjust=",Padjust ,", n=", N),
+          main = paste(gene,",Padjust=",Padjust,", n=",N),
           color = "Treatment", palette = c("#00AFBB", "#E7B800"),
           order = c("Control", "Silenced"),
           ylab = "Viral load", xlab = "Treatment")  + 
-          theme(legend.position = "none", text = element_text(size=13)) 
+          theme(legend.position = "none", text = element_text(size=8)) 
   boxplotVDV2[[gene]] <- p
 }
 
+#Padjust <- formattable(as.double(filter(VDV2Load$padj[, gene==gene[1]), digits = 2, format = "f"))
 # plot the viral load of VDV2 in 9 silenced genes:
 grid.arrange(boxplotVDV2$Anl, boxplotVDV2$clmd, boxplotVDV2$CuP14, boxplotVDV2$CuP8, boxplotVDV2$Glut, boxplotVDV2$Gly, boxplotVDV2$Sar, boxplotVDV2$Trans, boxplotVDV2$Twitch, nrow = 3, ncol = 3)
 ```
@@ -171,6 +174,7 @@ ARV2 viral loads for silenced and control-mites
 # plot ARV2 viral loads for silenced and control-mites, in a boxplot
 ARV2Load <- filter(viralLoad, virus == "ARV2")
 ARV2Load$gene = gsub('exp', 'ARV2', ARV2Load$gene)
+ARV2Load <- dplyr::rename(ARV2Load, Gene = gene) #i changed the colname of "gene" to "Gene". for some reason this was disturbing in "filter" function later on. 
 
 datARV2 <- filter(dat_virus, Gene == "ARV2")
 datARV2$Experiment = gsub('exp', 'ARV2', datARV2$Experiment)
@@ -180,14 +184,15 @@ for (gene in unique(datARV2$Experiment))
 {
   table <- filter(datARV2, Experiment == gene)
   N <- nrow(table)
-  Padjust <- formattable(as.double(ARV2Load$padj[1]), digits = 2, format = "f")
+  ARV2padj <- filter(ARV2Load, Gene == gene)
+  Padjust <- formattable(as.double(ARV2padj[1,4], digits = 2, format = "f"))
 # Plot
    p <- ggboxplot(table, x = "Treatment", y = "RQ", 
-          main = paste(gene, ", Padjust=",Padjust ,", n=", N),
+          main = paste(gene,",Padjust=",Padjust,", n=",N),
           color = "Treatment", palette = c("#00AFBB", "#E7B800"),
           order = c("Control", "Silenced"),
           ylab = "Viral load", xlab = "Treatment")  + 
-          theme(legend.position = "none", text = element_text(size=13)) 
+          theme(legend.position = "none", text = element_text(size=8)) 
   boxplotARV2[[gene]] <- p
 }
 
@@ -200,6 +205,7 @@ DWVa viral loads for silenced and control-mites
 # plot DWVa viral loads for silenced and control-mites, in a boxplot
 DWVaLoad <- filter(viralLoad, virus == "DWVa")
 DWVaLoad$gene = gsub('exp', 'DWVa', DWVaLoad$gene)
+DWVaLoad <- dplyr::rename(DWVaLoad, Gene = gene) #i changed the colname of "gene" to "Gene". for some reason this was disturbing in "filter" function later on. 
 
 datDWVa <- filter(dat_virus, Gene == "DWVa")
 datDWVa$Experiment = gsub('exp', 'DWVa', datDWVa$Experiment)
@@ -209,14 +215,15 @@ for (gene in unique(datDWVa$Experiment))
 {
   table <- filter(datDWVa, Experiment == gene)
   N <- nrow(table)
-  Padjust <- formattable(as.double(DWVaLoad$padj[1]), digits = 2, format = "f")
+  DWVapadj <- filter(DWVaLoad, Gene == gene)
+  Padjust <- formattable(as.double(DWVapadj[1,4], digits = 2, format = "f"))
 # Plot
    p <- ggboxplot(table, x = "Treatment", y = "RQ", 
-          main = paste(gene, ", Padjust=",Padjust ,", n=", N),
+          main = paste(gene,",Padjust=",Padjust,", n=",N),
           color = "Treatment", palette = c("#00AFBB", "#E7B800"),
           order = c("Control", "Silenced"),
           ylab = "Viral load", xlab = "Treatment")  + 
-          theme(legend.position = "none", text = element_text(size=13)) 
+          theme(legend.position = "none", text = element_text(size=8)) 
   boxplotDWVa[[gene]] <- p
 }
 
@@ -296,7 +303,7 @@ table <- filter(dat_virus, Gene == "VDV2" & Experiment == "CuP8_exp")
   stats <- grobTree(textGrob("N = 20\nPadjust = 0.02", x=0.5,  y=0.9, hjust=0,
   gp=gpar(col="black", fontsize=20)))
 # Plot
-  p <- ggboxplot(table, x = "Treatment", y = "RQ", 
+  VDV2_CuP8 <- ggboxplot(table, x = "Treatment", y = "RQ", 
           main = "VDV2 load in CuP8-silenced mites",
           color = "Treatment", 
           palette = c("#00AFBB", "#E7B800"),
@@ -311,7 +318,7 @@ table <- filter(dat_virus, Gene == "ARV2" & Experiment == "CuP8_exp")
   stats <- grobTree(textGrob("N = 20\nPadjust = 0.02", x=0.5,  y=0.9, hjust=0,
   gp=gpar(col="black", fontsize=20)))
 # Plot
-  p <- ggboxplot(table, x = "Treatment", y = "RQ", 
+  ARV2_CuP8 <- ggboxplot(table, x = "Treatment", y = "RQ", 
           main = "ARV2 load in CuP8-silenced mites",
           color = "Treatment", 
           palette = c("#00AFBB", "#E7B800"),
@@ -326,7 +333,7 @@ table <- filter(dat_virus, Gene == "DWVa" & Experiment == "CuP8_exp")
   stats <- grobTree(textGrob("N = 20\nPadjust = 0.2", x=0.5,  y=0.8, hjust=0,
   gp=gpar(col="black", fontsize=20)))
 # Plot
-  p <- ggboxplot(table, x = "Treatment", y = "RQ", 
+  DWVa_CuP8 <- ggboxplot(table, x = "Treatment", y = "RQ", 
           main = "DWVa load in CuP8-silenced mites",
           color = "Treatment", 
           palette = c("#00AFBB", "#E7B800"),
@@ -334,6 +341,9 @@ table <- filter(dat_virus, Gene == "DWVa" & Experiment == "CuP8_exp")
           ylab = "Relative viral load", xlab = "Treatment")  + 
           theme(legend.position = "none", text = element_text(size=20)) + 
           annotation_custom(stats)
+  
+  #plot CuP8 gene expression and the viruses load
+grid.arrange(CuP8, VDV2_CuP8,ARV2_CuP8, DWVa_CuP8 , nrow = 1)
 ```
 
 #### for Gly silenced mites
