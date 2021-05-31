@@ -128,7 +128,7 @@ table <- filter(dat_gene, Gene == "CuP8")
 results_load <- data.frame()
 for (gene in unique(dat_virus$Experiment))
   for (virus in unique(dat_virus$Gene)) {
-    test <- wilcox.test(RQ ~ Treatment, alternative = "two.sided", data = filter(dat_virus, Experiment == gene & Gene == virus) )
+    test <- wilcox.test(RQ ~ Treatment, alternative = "two.sided", data = filter(dat_virus, Experiment == gene & Gene == virus))
     results_load <- rbind(results_load, data.frame(gene = gene, virus = virus, pvalue = test$p.value))
   }
  
