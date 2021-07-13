@@ -39,6 +39,10 @@ library(intervcomp)
 library(grid)
 library(formattable)
 library(gridExtra)
+library(ggsignif)
+library(patchwork)
+library(cowplot)
+
 ```
 
 ### Load data
@@ -61,6 +65,7 @@ for (gene in unique(dat_gene$Gene))
   }
 
 #We are testing the same knockdown gene several times, creating a multiple comparison problem, we fix that with a FDR correction per gene
+### for some reason - the adjusted p-values are the same as the original p-vlaues!
 geneExp <- group_by(results_gene, gene) %>% 
   mutate(padj = p.adjust(pvalue, method = "fdr"))
 geneExp <- dplyr::rename(geneExp, Gene = gene) #i changed the colname of "gene" to "Gene". for some reason this was disturbing in "filter" function later on. 
@@ -88,9 +93,8 @@ grid.arrange(boxplot$Anl, boxplot$clmd, boxplot$Chl, boxplot$CuP14, boxplot$CuP8
 #lapply(boxplot, grid.arrange, nrow = 4, ncol = 3)
 ```
 
-each of the genes separately:
+#### Gly gene expression
 ```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-# for Gly:
 table <- filter(dat_gene, Gene == "Gly")
 # Add stats
   stats <- grobTree(textGrob("N = 27\nPadjust < 0.0001", x=0.5,  y=0.9, hjust=0,
@@ -104,10 +108,11 @@ table <- filter(dat_gene, Gene == "Gly")
           theme(legend.position = "none", text = element_text(size=20)) + 
           annotation_custom(stats)
 
+```
 
-   
-# for CuP8:
-table <- filter(dat_gene, Gene == "CuP8")
+## CuP8 gene expression for the MS Figrue 3a:
+```{r}
+CuP8 <- filter(dat_gene, Gene == "CuP8")
 # Add stats
   stats <- grobTree(textGrob("N = 22\nPadjust < 0.0001", x=0.5,  y=0.9, hjust=0,
   gp=gpar(col="black", fontsize=20)))
@@ -119,8 +124,23 @@ table <- filter(dat_gene, Gene == "CuP8")
           ylab = "Relative expression", xlab = "Treatment")  + 
           theme(legend.position = "none", text = element_text(size=20)) + 
           annotation_custom(stats)
+  
+### plot Figure 3a for the MS
+pCuP8<- ggboxplot(CuP8, x = "Treatment", y = "RQ", 
+          color = "Treatment", palette = c("#00AFBB", "#E7B800"),
+          order = c("Control", "Silenced"),
+          ylab = "Relative gene expression", xlab = "Treatment")  + 
+          theme(legend.position = "none", text = element_text(size=15)) +
+   geom_signif(comparisons = list(c("Control", "Silenced")),
+                      size = 0.6,
+                      textsize = 10,
+                      annotations = "***",
+                      tip_length = 0, 
+                      vjust=0.5,
+                     y_position = 4.5)
+ 
+ #export - pdf, 3x4 inches
 ```
-
 
 ## Viral load in silenced and control mites
 ### test for differene in viral load, between treatment and control (Wilcoxon ranked test)
@@ -255,7 +275,7 @@ table <- filter(dat_virus, Gene == "VDV2" & Experiment == "CuP8_exp")
   stats <- grobTree(textGrob("N = 20\nPadjust = 0.02", x=0.5,  y=0.9, hjust=0,
   gp=gpar(col="black", fontsize=20)))
 # Plot
-  p <- ggdotplot(table, x = "Treatment", y = "RQ", 
+  pVDV2 <- ggdotplot(table, x = "Treatment", y = "RQ", 
           main = "VDV2 load in CuP8-silenced mites",
           color = "Treatment", fill = "Treatment",
           palette = c("#00AFBB", "#E7B800"),
@@ -270,7 +290,7 @@ table <- filter(dat_virus, Gene == "ARV2" & Experiment == "CuP8_exp")
   stats <- grobTree(textGrob("N = 20\nPadjust = 0.02", x=0.5,  y=0.9, hjust=0,
   gp=gpar(col="black", fontsize=20)))
 # Plot
-  p <- ggdotplot(table, x = "Treatment", y = "RQ", 
+  pARV2 <- ggdotplot(table, x = "Treatment", y = "RQ", 
           main = "ARV2 load in CuP8-silenced mites",
           color = "Treatment", fill = "Treatment",
           palette = c("#00AFBB", "#E7B800"),
@@ -285,7 +305,7 @@ table <- filter(dat_virus, Gene == "DWVa" & Experiment == "CuP8_exp")
   stats <- grobTree(textGrob("N = 20\nPadjust = 0.2", x=0.5,  y=0.8, hjust=0,
   gp=gpar(col="black", fontsize=20)))
 # Plot
-  p <- ggdotplot(table, x = "Treatment", y = "RQ", 
+  pDWVa <- ggdotplot(table, x = "Treatment", y = "RQ", 
           main = "DWVa load in CuP8-silenced mites",
           color = "Treatment", fill = "Treatment",
           palette = c("#00AFBB", "#E7B800"),
@@ -293,58 +313,137 @@ table <- filter(dat_virus, Gene == "DWVa" & Experiment == "CuP8_exp")
           ylab = "Relative viral load", xlab = "Treatment")  + 
           theme(legend.position = "none", text = element_text(size=20)) + 
           annotation_custom(stats)
+  
+grid.arrange(CuP8, pVDV2, pARV2,pDWVa, nrow = 1)
 ```
+
 
 #### for CuP8 silenced mites - boxplots
+viruses in CuP8 silenced mites, for MS
 ```{r  message=FALSE, warning=FALSE}
+CuP8 <- filter(dat_gene, Gene == "CuP8")
+  
+### plot Figure 3a for the MS
+pCuP8<- ggboxplot(CuP8, x = "Treatment", y = "RQ", 
+          fill = "Treatment", palette = c("#00AFBB", "#E7B800"),
+          order = c("Control", "Silenced"),
+          ylab = "Relative gene expression", xlab = "CuP8 gene expression")  + 
+          theme(legend.position = "none", text = element_text(size=15), axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+          geom_signif(comparisons = list(c("Control", "Silenced")),
+                      size = 0.6,
+                      textsize = 10,
+                      annotations = "***",
+                      tip_length = 0, 
+                      vjust=0.5,
+                     margin_top = 0.06) 
+
+#transparet fill:
+# fill = "Treatment", palette = c("#00AFBB99", "#E7B80099"),
+# no titles:
+# theme(axis.title.x = element_blank()) 
+
 # for VDV2 in CuP8 silenced mites:
-table <- filter(dat_virus, Gene == "VDV2" & Experiment == "CuP8_exp")
-# Add stats
-  stats <- grobTree(textGrob("N = 20\nPadjust = 0.02", x=0.5,  y=0.9, hjust=0,
-  gp=gpar(col="black", fontsize=20)))
+VDV2_CuP8 <- filter(dat_virus, Gene == "VDV2" & Experiment == "CuP8_exp")
+
 # Plot
-  VDV2_CuP8 <- ggboxplot(table, x = "Treatment", y = "RQ", 
-          main = "VDV2 load in CuP8-silenced mites",
+pVDV2_CuP8 <- ggboxplot(VDV2_CuP8, x = "Treatment", y = "RQ", 
           color = "Treatment", 
           palette = c("#00AFBB", "#E7B800"),
           order = c("Control", "Silenced"),
-          ylab = "Relative viral load", xlab = "Treatment")  + 
-          theme(legend.position = "none", text = element_text(size=20)) + 
-          annotation_custom(stats)
+          ylab = "Relative viral load", xlab = "VDV2 viral load") +
+          theme(legend.position = "none", text = element_text(size=15), axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+          geom_signif(comparisons = list(c("Control", "Silenced")),
+                      size = 0.6,
+                      textsize = 10,
+                      annotations = "*",
+                      tip_length = 0, 
+                      vjust=0.5,
+                      margin_top = 0.06)
 
 # for ARV2 in CuP8 silenced mites:
-table <- filter(dat_virus, Gene == "ARV2" & Experiment == "CuP8_exp")
-# Add stats
-  stats <- grobTree(textGrob("N = 20\nPadjust = 0.02", x=0.5,  y=0.9, hjust=0,
-  gp=gpar(col="black", fontsize=20)))
+ARV2_CuP8 <- filter(dat_virus, Gene == "ARV2" & Experiment == "CuP8_exp")
+
 # Plot
-  ARV2_CuP8 <- ggboxplot(table, x = "Treatment", y = "RQ", 
-          main = "ARV2 load in CuP8-silenced mites",
+pARV2_CuP8 <- ggboxplot(ARV2_CuP8, x = "Treatment", y = "RQ", 
           color = "Treatment", 
           palette = c("#00AFBB", "#E7B800"),
           order = c("Control", "Silenced"),
-          ylab = "Relative viral load", xlab = "Treatment")  + 
-          theme(legend.position = "none", text = element_text(size=20)) + 
-          annotation_custom(stats)
+          ylab = "Relative viral load", xlab = "ARV-2 viral load")  + 
+          theme(axis.title.y = element_blank()) +
+          theme(legend.position = "none", text = element_text(size=15), axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+          geom_signif(comparisons = list(c("Control", "Silenced")),
+                      size = 0.6,
+                      textsize = 10,
+                      annotations = "*",
+                      tip_length = 0, 
+                      vjust=0.5,
+                     margin_top = 0.06)
   
 # for DWVa in CuP8 silenced mites:
-table <- filter(dat_virus, Gene == "DWVa" & Experiment == "CuP8_exp")
-# Add stats
-  stats <- grobTree(textGrob("N = 20\nPadjust = 0.2", x=0.5,  y=0.8, hjust=0,
-  gp=gpar(col="black", fontsize=20)))
+DWVa_CuP8 <- filter(dat_virus, Gene == "DWVa" & Experiment == "CuP8_exp")
+
 # Plot
-  DWVa_CuP8 <- ggboxplot(table, x = "Treatment", y = "RQ", 
-          main = "DWVa load in CuP8-silenced mites",
+pDWVa_CuP8 <- ggboxplot(DWVa_CuP8, x = "Treatment", y = "RQ", 
           color = "Treatment", 
           palette = c("#00AFBB", "#E7B800"),
           order = c("Control", "Silenced"),
-          ylab = "Relative viral load", xlab = "Treatment")  + 
-          theme(legend.position = "none", text = element_text(size=20)) + 
-          annotation_custom(stats)
+          ylab = "Relative viral load", xlab = "DWVa viral load")  + 
+          theme(axis.title.y = element_blank()) +
+          theme(legend.position = c(0.8, 0.8),text = element_text(size=15), axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+          geom_signif(comparisons = list(c("Control", "Silenced")),
+                      size = 0.6,
+                      textsize = 5,
+                      annotations = "NS",
+                      tip_length = 0, 
+                      margin_top = 0.06)
   
-  #plot CuP8 gene expression and the viruses load
-grid.arrange(CuP8, VDV2_CuP8,ARV2_CuP8, DWVa_CuP8 , nrow = 1)
+#plot CuP8 gene expression and the viruses load
+grid.arrange(pCuP8,  pVDV2_CuP8, pARV2_CuP8, pDWVa_CuP8 , nrow = 1)
+
+# another option
+# arrange the three plots in a single row
+prow <- plot_grid( pCuP8 + theme(legend.position="none"),
+           pVDV2_CuP8 + theme(legend.position="none"),
+           pARV2_CuP8 + theme(legend.position="none"),
+           pDWVa_CuP8 + theme(legend.position="none"),
+             align = 'vh',
+           hjust = -1,
+           nrow = 1
+           )
+legend_gene <- get_legend(pCuP8 + theme(legend.position="bottom"))
+plot_grid( prow, legend_gene, ncol = 1, rel_heights = c(1, .2))
+
+
+# another option
+#arragen viruses plots
+pvirus <- plot_grid(pVDV2_CuP8 + theme(legend.position="none"),
+           pARV2_CuP8 + theme(legend.position="none"),
+           pDWVa_CuP8 + theme(legend.position="none"),
+             align = 'vh',
+           hjust = -1,
+           nrow = 1) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+# arrange the three plots in a single row
+prow <- plot_grid( pCuP8 + theme(legend.position="none"),
+           pvirus,
+             align = 'vh',
+           hjust = -1,
+           nrow = 1
+           )
+legend_gene <- get_legend(pCuP8 + theme(legend.position="bottom"))
+plot_grid( prow, legend_gene, ncol = 1, rel_heights = c(1, .2))
+# legend.position = "horizontal", 
 ```
+
+
+
+
+
 
 #### for Gly silenced mites
 ```{r  message=FALSE, warning=FALSE}
