@@ -91,7 +91,7 @@ Table_S6 <- full_join(results_fisher, dat_survival, by = "exp") %>%
     dplyr::select(Date, target, Live, Dead, pvalue) %>%
     rename(target = 'Silenced-gene')
 
-write_csv(Table_S6, file = "/Users/nuriteliash/Documents/GitHub/varroa-virus-knockdown/results/Table_S6.csv")
+#write_csv(Table_S6, file = "/Users/nuriteliash/Documents/GitHub/varroa-virus-knockdown/results/Table_S6.csv")
 ```
 
 ## Gene expression in dsRNA-treated and control mites
@@ -110,7 +110,7 @@ geneExp <- group_by(results_gene, gene) %>%
   mutate(padj = p.adjust(pvalue, method = "fdr"))
 geneExp <- dplyr::rename(geneExp, Gene = gene) #i changed the colname of "gene" to "Gene". for some reason this was disturbing in "filter" function later on. 
 
-write_csv(geneExp, "/Users/nuriteliash/Documents/GitHub/varroa-virus-knockdown/results/Table_S5.csv")
+#write_csv(geneExp, "/Users/nuriteliash/Documents/GitHub/varroa-virus-knockdown/results/Table_S5.csv")
 
 # plot all genes expression for silenced and control-mites, in a boxplot
 boxplot <- list()
@@ -370,7 +370,7 @@ pCuP8 <- ggboxplot(CuP8, x = "Treatment", y = "RQ",
           order = c("Control", "Silenced"),
           ylab = "Relative gene expression", xlab = "CuP8 gene expression")  + 
           theme(axis.title.y = element_text(margin = margin(r = 10))) +
-  theme(panel.background = element_rect(fill = 'lightgray')) +
+  #theme(panel.background = element_rect(fill = 'lightgray')) +
           theme(legend.position = "none", text = element_text(size=30), axis.text.x=element_blank(),
           axis.ticks.x=element_blank()) +
           geom_signif(comparisons = list(c("Control", "Silenced")),
@@ -435,3 +435,38 @@ pDWVa_CuP8 <- ggboxplot(DWVa_CuP8, x = "Treatment", y = "RQ",
 #plot CuP8 gene expression and the viruses load
 grid.arrange(pCuP8, pVDV2_CuP8, pARV2_CuP8, pDWVa_CuP8 , nrow = 1)
 ```
+
+## viral load in CuP8 silenced mites - boxplots figures for kakenhi proposal 
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+CuP8 <- filter(dat_gene, Gene == "CuP8")
+  
+### plot the gene expression 
+pCuP8 <- ggboxplot(CuP8, x = "Treatment", y = "RQ", 
+          fill = "Treatment", palette = c("white", "black"), lwd=2,
+          order = c("Control", "Silenced"),
+          ylab = "Relative gene expression", xlab = "CuP8 gene expression")  + 
+          theme(axis.title.y = element_text(margin = margin(r = 10))) +
+          theme(legend.position = "none", text = element_text(size=30), axis.text.x=element_blank()) +
+          geom_signif(comparisons = list(c("Control", "Silenced")),
+                      textsize = 20,
+                      annotations = "***",
+                      y_position = 4,
+                      lwd = 0) 
+,
+          axis.ticks.x=element_blank()
+
+# for VDV2 in CuP8 silenced mites:
+VDV2_CuP8 <- filter(dat_virus, Gene == "VDV2" & Experiment == "CuP8_exp")
+
+# Plot
+pVDV2_CuP8 <- ggboxplot(VDV2_CuP8, x = "Treatment", y = "RQ", 
+          fill = "Treatment", palette = c("white", "black"), lwd=2,
+          order = c("Control", "Silenced"),
+          ylab = "Relative viral load", xlab = "VDV2 viral load") +
+          theme(legend.position = "none", text = element_text(size=30), axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+          geom_signif(comparisons = list(c("Control", "Silenced")),
+                      textsize = 20,
+                      annotations = "*",
+                      y_position = 2.2,
+                      lwd = 0)
