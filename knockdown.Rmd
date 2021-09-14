@@ -446,14 +446,14 @@ pCuP8 <- ggboxplot(CuP8, x = "Treatment", y = "RQ",
           order = c("Control", "Silenced"),
           ylab = "Relative gene expression", xlab = "CuP8 gene expression")  + 
           theme(axis.title.y = element_text(margin = margin(r = 10))) +
-          theme(legend.position = "none", text = element_text(size=30), axis.text.x=element_blank()) +
-          geom_signif(comparisons = list(c("Control", "Silenced")),
+          theme(legend.position = "none", text = element_text(size=30), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+
+      #    +geom_signif(comparisons = list(c("Control", "Silenced")),
                       textsize = 20,
                       annotations = "***",
                       y_position = 4,
                       lwd = 0) 
-,
-          axis.ticks.x=element_blank()
+
 
 # for VDV2 in CuP8 silenced mites:
 VDV2_CuP8 <- filter(dat_virus, Gene == "VDV2" & Experiment == "CuP8_exp")
@@ -464,8 +464,9 @@ pVDV2_CuP8 <- ggboxplot(VDV2_CuP8, x = "Treatment", y = "RQ",
           order = c("Control", "Silenced"),
           ylab = "Relative viral load", xlab = "VDV2 viral load") +
           theme(legend.position = "none", text = element_text(size=30), axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-          geom_signif(comparisons = list(c("Control", "Silenced")),
+        axis.ticks.x=element_blank()) 
+
+        #  +geom_signif(comparisons = list(c("Control", "Silenced")),
                       textsize = 20,
                       annotations = "*",
                       y_position = 2.2,
