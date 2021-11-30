@@ -374,9 +374,10 @@ pCuP8 <- ggboxplot(CuP8, x = "Treatment", y = "RQ",
           theme(legend.position = "none", text = element_text(size=30), axis.text.x=element_blank(),
           axis.ticks.x=element_blank()) +
           geom_signif(comparisons = list(c("Control", "Silenced")),
-                      textsize = 20,
-                      annotations = "***",
-                      y_position = 4,
+                      textsize = 7,
+                      annotations = "Padjust<0.0001",
+                      #y_position = 4,
+                      margin_top = 0.05, 
                       lwd = 0) 
 
 # for VDV2 in CuP8 silenced mites:
@@ -391,9 +392,10 @@ pVDV2_CuP8 <- ggboxplot(VDV2_CuP8, x = "Treatment", y = "RQ",
           theme(legend.position = "none", text = element_text(size=30), axis.text.x=element_blank(),
         axis.ticks.x=element_blank()) +
           geom_signif(comparisons = list(c("Control", "Silenced")),
-                      textsize = 20,
-                      annotations = "*",
-                      y_position = 2.2,
+                      textsize = 7,
+                      annotations = "Padjust=0.02",
+                      #y_position = 2.2,
+                      margin_top = 0.05,
                       lwd = 0)
 
 # for ARV2 in CuP8 silenced mites:
@@ -409,9 +411,10 @@ pARV2_CuP8 <- ggboxplot(ARV2_CuP8, x = "Treatment", y = "RQ",
           theme(legend.position = "none", text = element_text(size=30), axis.text.x=element_blank(),
         axis.ticks.x=element_blank()) +
           geom_signif(comparisons = list(c("Control", "Silenced")),
-                      textsize = 20,
-                      annotations = "*",
-                      y_position = 20,
+                      textsize = 7,
+                      annotations = "Padjust=0.02",
+                      #y_position = 20,
+                      margin_top = 0.05,
                       lwd = 0)
   
 # for DWVa in CuP8 silenced mites:
@@ -428,9 +431,10 @@ pDWVa_CuP8 <- ggboxplot(DWVa_CuP8, x = "Treatment", y = "RQ",
         axis.ticks.x=element_blank()) +
           geom_signif(comparisons = list(c("Control", "Silenced")),
                       textsize = 7,
-                      annotations = "NS",
-                      y_position = 3.5e+05,
-                      lwd = 0)
+                      annotations = "Padjust=0.2",
+                      #y_position = 3.5e+05,
+                     margin_top = 0.05,
+                     lwd = 0)
   
 #plot CuP8 gene expression and the viruses load
 grid.arrange(pCuP8, pVDV2_CuP8, pARV2_CuP8, pDWVa_CuP8 , nrow = 1)
