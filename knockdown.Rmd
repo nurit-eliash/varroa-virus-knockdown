@@ -2,14 +2,28 @@
 title: "Varroa virus knockdown"
 output:
   html_document:
-    theme: paper
+    code_folding: hide
+    theme: cerulean
     toc: yes
     toc_depth: 5
     toc_float:
       collapsed: yes
       df_print: paged
 ---
+<style type="text/css">
+  body{
+  font-size: 12pt;
+}
+</style>
 
+In this study we investigated virus-virus and vector-virus interactions by combining two approaches: 
+
+(1) meta-transciptomic analysis, and 
+(2) gene-silencing experiments. 
+
+In the following code we analyze the experimental validation of the (2) gene silencing experiments.
+
+The output figures include the original figure 3, in the relevant manuscript [Eliash et al.__](doi)  
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -56,7 +70,7 @@ dat_gene <- dat_gene %>%
 ```
 
 ## Effect of dsRNA on varroa survival (Fisher exact test)
-```{r}
+```{r varroa survival stats, message=FALSE, warning=FALSE}
 # for each date, compare the live and dead mite distribution of GFP to each of the dsRNA treatments. 
 results_fisher <- data.frame()
 
@@ -89,7 +103,7 @@ dat_survival$exp <- paste(dat_survival$Date, dat_survival$target)
 Table_S6 <- full_join(results_fisher, dat_survival, by = "exp") %>%
     dplyr::filter(grepl(paste(genes, collapse="|"), exp)) %>%
     dplyr::select(Date, target, Live, Dead, pvalue) %>%
-    rename(target = 'Silenced-gene')
+    rename(target = "Silenced-gene")
 
 #write_csv(Table_S6, file = "/Users/nuriteliash/Documents/GitHub/varroa-virus-knockdown/results/Table_S6.csv")
 ```
