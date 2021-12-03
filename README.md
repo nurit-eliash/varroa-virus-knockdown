@@ -6,4 +6,4 @@ We experinemtally validated the hub-genes in the networks, based on gene network
 by knocking down (unsing RNAi-silencing), then measuring the viral load. 
 Experimental procedures and supplementary material can be found in [the manuscript](___)
 
-### The code and original figures can be found [here](https://nurit-eliash.github.io/varroa-virus-knockdown/).
+### Code and original figures can be found [here](https://nurit-eliash.github.io/varroa-virus-knockdown/).
