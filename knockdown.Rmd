@@ -9,6 +9,8 @@ output:
     toc_float:
       collapsed: yes
       df_print: paged
+editor_options: 
+  chunk_output_type: console
 ---
 <style type="text/css">
   body{
@@ -36,14 +38,14 @@ library(tidyverse)
 library(ggplot2)
 library(Rmisc)
 library(ggpubr)
-library(anchors)
+#library(anchors) not avilable for the current R 
 library(broom)
 library(HDInterval)
 library(coda)
 library(brms)
 library(devtools)
-library(rjags)
-library(BEST)
+#library(rjags)
+#library(BEST)
 library(ggpubr)
 library(ggthemes)
 library(car) 
@@ -447,13 +449,13 @@ pCuP8 <- ggboxplot(CuP8, x = "Treatment", y = "RQ",
           order = c("Control", "Silenced"),
           ylab = "Relative gene expression", xlab = "CuP8 gene expression")  + 
           theme(axis.title.y = element_text(margin = margin(r = 10))) +
-          theme(legend.position = "none", text = element_text(size=30), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+          theme(legend.position = "none", text = element_text(size=20), axis.title.x = element_blank())
 
       #    +geom_signif(comparisons = list(c("Control", "Silenced")),
-                      textsize = 20,
-                      annotations = "***",
-                      y_position = 4,
-                      lwd = 0) 
+       #               textsize = 20,
+        #              annotations = "***",
+         #             y_position = 4,
+          #            lwd = 0) 
 
 
 # for VDV2 in CuP8 silenced mites:
@@ -463,13 +465,25 @@ VDV2_CuP8 <- filter(dat_virus, Gene == "VDV2" & Experiment == "CuP8_exp")
 pVDV2_CuP8 <- ggboxplot(VDV2_CuP8, x = "Treatment", y = "RQ", 
           fill = "Treatment", palette = c("white", "black"), lwd=2,
           order = c("Control", "Silenced"),
-          ylab = "Relative viral load", xlab = "VDV2 viral load") +
-          theme(legend.position = "none", text = element_text(size=30), axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) 
+          ylab = "Relative viral load") +
+          theme(legend.position = "none", text = element_text(size=20), axis.title.x = element_blank())
 
         #  +geom_signif(comparisons = list(c("Control", "Silenced")),
-                      textsize = 20,
-                      annotations = "*",
-                      y_position = 2.2,
-                      lwd = 0)
+       #               textsize = 20,
+        #              annotations = "*",
+         #             y_position = 2.2,
+          #            lwd = 0)
+
+# for DWVa in CuP8 silenced mites:
+DWVa_CuP8 <- filter(dat_virus, Gene == "DWVa" & Experiment == "CuP8_exp")
+
+pDWVa_CuP8 <- ggboxplot(DWVa_CuP8, x = "Treatment", y = "RQ", 
+          fill = "Treatment", palette = c("white", "black"), lwd=2,
+          order = c("Control", "Silenced"),
+          ylab = "Relative viral load") +
+          theme(legend.position = "none", text = element_text(size=20), axis.title.y = element_blank(), axis.title.x = element_blank()) 
+  
+#plot CuP8 gene expression and the viruses load
+grid.arrange(pVDV2_CuP8, pDWVa_CuP8 , nrow = 1)
+pCuP8
 ```
